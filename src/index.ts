@@ -64,7 +64,11 @@ export class DualShock4 {
         { vendorId: 0x11C0, productId: 0x4001 },
         { vendorId: 0x0C12, productId: 0x57AB },
         { vendorId: 0x0C12, productId: 0x0E16 },
-        { vendorId: 0x0F0D, productId: 0x0084 }
+        { vendorId: 0x0F0D, productId: 0x0084 },
+        // GP2040-CE known IDs
+        { vendorId: 0x1532, productId: 0x0401 },
+        { vendorId: 0x33df, productId: 0x0011 },
+        { vendorId: 0x0738, productId: 0x8180 },
       ]
     })
 
