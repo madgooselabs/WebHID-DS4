@@ -74,6 +74,8 @@ export class DualShock4 {
 
     this.device = devices[0]
 
+    console.dir(this.device);
+
     await this.device.open()
 
     this.device.oninputreport = (e : HIDInputReportEvent) => this.processControllerReport(e)

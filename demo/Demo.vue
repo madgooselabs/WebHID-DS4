@@ -2,7 +2,7 @@
   <div>
     <div v-for="(controller, i) in controllers" :key="i">
       <h2>
-        Controller #{{i}} ({{controller.state.interface.toUpperCase()}},
+        Controller #{{i}}{{controller.device.productName ? ' &mdash; '+controller.device.productName : ''}} ({{controller.state.interface.toUpperCase()}},
         Battery: {{controller.state.battery}}%
         <span v-if="controller.state.charging">[charging]</span>)
       </h2>
