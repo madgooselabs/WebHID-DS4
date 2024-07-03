@@ -49,68 +49,95 @@
   </div>
 </template>
 <style>
+/* Default Light Mode Styles */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  font-weight: 300;
-  margin: auto;
-  padding: 16px;
-  max-width: 960px;
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+    font-weight: 300;
+    margin: auto;
+    padding: 16px;
+    max-width: 960px;
 }
 
 h1, h2, h3, h4, h5 {
-  font-weight: 100;
+    font-weight: 100;
 }
 
 a {
-  color: #689F38;
-  text-decoration: none;
+    color: #689f38;
+    text-decoration: none;
 }
 
 code {
-  background: #E0E0E0;
-  padding: 4px;
-  border-radius: 2px;
+    padding: 4px;
+    border-radius: 2px;
+}
+
+code, pre {
+    background: #e0e0e0;
 }
 
 pre {
-  width: 100%;
-  background: #E0E0E0;
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #BDBDBD;
-  overflow-x: auto;
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #bdbdbd;
+    overflow-x: auto;
 }
 
 blockquote {
-  border-left: 2px solid #BDBDBD;
-  padding-left: 4px;
-  margin-left: 0;
+    border-left: 2px solid #bdbdbd;
+    padding-left: 4px;
+    margin-left: 0;
 }
 
 img {
-  max-height: 70vh;
-  max-width: 100%;
+    max-height: 70vh;
+    max-width: 100%;
 }
 
-.buttons .btn {
-  display: inline-block;
-  background: #AAAAAA;
-  margin: 4px;
-  padding: 8px;
-  transition: opacity 300ms ease
+.analogs .analog, .buttons .btn {
+    display: inline-block;
+    background: #aaa;
+    margin: 4px;
+    padding: 8px;
+    transition: opacity 0.3s ease;
 }
 
 .analogs .analog {
-  display: inline-block;
-  background: #AAAAAA;
-  margin: 4px;
-  padding: 8px;
-  transition: opacity 300ms ease;
-  min-width: 64px;
+    min-width: 64px;
 }
 
 .name {
-  text-transform: capitalize;
+    text-transform: capitalize;
+}
+
+/* Dark Mode Styles */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+
+    a {
+        color: #9ccc65;
+    }
+
+    code, pre {
+        background: #333;
+        color: #e0e0e0;
+    }
+
+    pre {
+        border: 1px solid #666;
+    }
+
+    blockquote {
+        border-left: 2px solid #666;
+    }
+
+    .analogs .analog, .buttons .btn {
+        background: #444;
+    }
 }
 </style>
 <script>
