@@ -11,11 +11,11 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build-full": "rollup -c",
-    "build-docs": "parcel build demo/index.html -d docs --public-url ./ && typedoc",
-    "build": "parcel build demo/index.html --public-url ./ && typedoc",
+    "build": "parcel build demo/index.html -d docs --public-url ./ && typedoc",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "build-full": "rollup -c",
+    "build-docs": "parcel build demo/index.html -d docs --public-url ./ && typedoc"
   },
   "devDependencies": {
     "@types/crc": "^3.4.0",
