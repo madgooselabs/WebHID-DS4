@@ -12,6 +12,18 @@ export interface DualShock4State {
   /** Is the battery being charged? */
   charging : boolean
 
+  controllerType : number
+
+  headphones : boolean
+  microphone : boolean
+  extension : boolean
+
+  /** Audio state */
+  audio : string
+
+  /** Report List */
+  reports : number[]
+
   /** Analog positions */
   axes : DualShock4AnalogState
   /** Buttons pressed */
@@ -146,6 +158,18 @@ export enum DualShock4Interface {
 }
 
 /**
+ * Controller Type
+ */
+export enum DualShock4ControllerType {
+    Gamepad = 0,
+    Guitar = 1,
+    Drums = 2,
+    Wheel = 6,
+    Fightstick = 7,
+    HOTAS = 8
+}
+
+/**
  * Default / Initial State
  * @ignore
  */
@@ -153,6 +177,14 @@ export const defaultState : DualShock4State = {
   interface: DualShock4Interface.Disconnected,
   battery: 0,
   charging: false,
+  controllerType: 0,
+  headphones: false,
+  microphone: false,
+  extension: false,
+
+  audio: '',
+
+  reports: [],
 
   axes: {
     leftStickX: 0,

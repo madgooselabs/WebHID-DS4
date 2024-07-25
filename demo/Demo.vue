@@ -2,9 +2,15 @@
   <div>
     <div v-for="(controller, i) in controllers" :key="i">
       <h2>
-        Controller #{{i}}{{controller.device.productName ? ' &mdash; '+controller.device.productName : ''}} ({{controller.state.interface.toUpperCase()}},
-        Battery: {{controller.state.battery}}%
-        <span v-if="controller.state.charging">[charging]</span>)
+        <div>Controller #{{i}}{{controller.device.productName ? ' &mdash; '+controller.device.productName : ''}} {{controller.state.interface.toUpperCase()}}</div>
+        <div>Type: {{controller.state.controllerType}}</div>
+        <div>Battery: {{controller.state.battery}}%</div>
+        <span v-show="controller.state.charging"><font-awesome-icon icon="fa-solid fa-plug" /></span>
+        <span v-show="controller.state.audio == 'headphones'"><font-awesome-icon icon="fa-solid fa-headphones" /></span>
+        <span v-show="controller.state.audio == 'headset'"><font-awesome-icon icon="fa-solid fa-headset" /></span>
+        <span v-show="controller.state.audio == 'microphone'"><font-awesome-icon icon="fa-solid fa-microphone" /></span>
+        <span v-show="controller.state.audio == 'volume-high'"><font-awesome-icon icon="fa-solid fa-volume-high" /></span>
+        <span v-show="controller.state.extension"><font-awesome-icon icon="fa-solid fa-link" /></span>
       </h2>
       <div class="params">
         <h4>Lightbar Color</h4>
@@ -153,7 +159,9 @@ export default {
     async addController () {
       const controller = new DualShock4()
       await controller.init()
-      this.controllers.push(controller)
+      if (controller.device) {
+        this.controllers.push(controller)
+      }
     }
   },
   computed: {

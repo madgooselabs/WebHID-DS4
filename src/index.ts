@@ -40,9 +40,8 @@ export class DualShock4 {
   async init () {
     if (this.device && this.device.opened) return
 
-    const devices = await navigator.hid.requestDevice({
-      // TODO: Add more compatible controllers?
-      filters: [
+    const knownDevices = [
+        // TODO: Add more compatible controllers?
         // Official Sony Controllers
         { vendorId: 0x054C, productId: 0x0BA0 },
         { vendorId: 0x054C, productId: 0x05C4 },
@@ -69,16 +68,41 @@ export class DualShock4 {
         { vendorId: 0x1532, productId: 0x0401 },
         { vendorId: 0x33df, productId: 0x0011 },
         { vendorId: 0x0738, productId: 0x8180 },
-      ]
-    })
+        // Best guess third party controllers
+        { usagePage: 0xFF00, usage: 1 }
+    ];
 
-    this.device = devices[0]
+    const devices = await navigator.hid.requestDevice({ filters: knownDevices })
 
-    console.dir(this.device);
+    if (devices.length > 0) {
+        this.device = devices[0]
 
-    await this.device.open()
+        if (this.device) {
+            console.dir(this.device);
 
-    this.device.oninputreport = (e : HIDInputReportEvent) => this.processControllerReport(e)
+            await this.device.open()
+
+            this.device.oninputreport = (e : HIDInputReportEvent) => this.processControllerReport(e)
+            this.state.reports = this.device!.collections!.map(c => c.featureReports!.map(m => m.reportId)).flat()
+            if (this.state.reports.find((reportID) => reportID == 0x03)) {
+              // get device details
+              let dataReport = new Uint8Array((await this.device!.receiveFeatureReport(0x03)).buffer)
+              this.state.controllerType = dataReport[5]
+              //let dataReport = await this.device.sendFeatureReport(0x14, new Uint8Array([0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]))
+              //console.dir(dataReport)
+            }
+        } else {
+            this.device = undefined
+        }
+    } else {
+        this.device = undefined
+    }
+  }
+
+  private buf2hex(buffer:ArrayBuffer) { // buffer is an ArrayBuffer
+    return [...new Uint8Array(buffer)]
+        .map(x => '0x'+x.toString(16).padStart(2, '0'))
+        .join(', ');
   }
 
   /**
@@ -91,6 +115,12 @@ export class DualShock4 {
   private processControllerReport (report : HIDInputReportEvent) {
     const { data } = report
     this.lastReport = data.buffer
+
+    if (report.reportId != 0x01) {
+        console.dir(report.reportId);
+        console.dir(data.buffer);
+        console.log('---');
+    }
 
     // Interface is unknown
     if (this.state.interface === DualShock4Interface.Disconnected) {
@@ -168,6 +198,20 @@ export class DualShock4 {
       this.state.battery = Math.min(Math.floor((data.getUint8(29) & 0x0F) * 100 / 11))
     } else {
       this.state.battery = Math.min(100, Math.floor((data.getUint8(29) & 0x0F) * 100 / 8))
+    }
+
+    this.state.headphones = !!(data.getUint8(29) & 0x20)
+    this.state.microphone = !!(data.getUint8(29) & 0x40)
+    this.state.extension = !!(data.getUint8(29) & 0x80)
+
+    if (this.state.headphones && this.state.microphone) {
+        this.state.audio = 'headset'
+    } else if (this.state.headphones && !this.state.microphone) {
+        this.state.audio = 'headphones'
+    } else if (!this.state.headphones && this.state.microphone) {
+        this.state.audio = 'microphone'
+    } else {
+        this.state.audio = 'volume-high'
     }
     
     // Update motion input
