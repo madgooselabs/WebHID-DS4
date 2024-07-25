@@ -13,7 +13,7 @@
   "scripts": {
     "build": "parcel build demo/index.html -d docs --public-url ./ && typedoc",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
+    "deploy": "gh-pages -d docs",
     "build-full": "rollup -c",
     "build-docs": "parcel build demo/index.html -d docs --public-url ./ && typedoc"
   },
