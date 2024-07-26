@@ -1,4 +1,4 @@
-import { defaultState, DualShock4Interface } from './state'
+import { defaultState, DualShock4Interface, DualShock4ControllerType } from './state'
 import DualShock4Lightbar from './lightbar'
 import DualShock4Rumble from './rumble'
 import { normalizeThumbstick, normalizeTrigger } from './util/normalize'
@@ -29,6 +29,10 @@ export class DualShock4 {
     if (!navigator.hid || !navigator.hid.requestDevice) {
       throw new Error('WebHID not supported by browser or not available.')
     }
+  }
+
+  getNameOfControllerType(controllerType : Number) : any {
+    return (DualShock4ControllerType[controllerType] ? DualShock4ControllerType[controllerType] : `Unknown Type: 0x${controllerType.toString(16).padStart(2, '0')}`);
   }
 
   /**
@@ -90,6 +94,8 @@ export class DualShock4 {
               this.state.controllerType = dataReport[5]
               //let dataReport = await this.device.sendFeatureReport(0x14, new Uint8Array([0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]))
               //console.dir(dataReport)
+            } else {
+              this.state.controllerType = DualShock4ControllerType.Gamepad
             }
         } else {
             this.device = undefined

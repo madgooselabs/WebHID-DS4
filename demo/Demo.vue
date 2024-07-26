@@ -3,7 +3,7 @@
     <div v-for="(controller, i) in controllers" :key="i">
       <h2>
         <div>Controller #{{i}}{{controller.device.productName ? ' &mdash; '+controller.device.productName : ''}} {{controller.state.interface.toUpperCase()}}</div>
-        <div>Type: {{controller.state.controllerType}}</div>
+        <div>Type: {{controller.getNameOfControllerType(controller.state.controllerType)}}</div>
         <div>Battery: {{controller.state.battery}}%</div>
         <span v-show="controller.state.charging"><font-awesome-icon icon="fa-solid fa-plug" /></span>
         <span v-show="controller.state.audio == 'headphones'"><font-awesome-icon icon="fa-solid fa-headphones" /></span>
