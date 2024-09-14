@@ -73,10 +73,12 @@ export class DualShock4 {
         { vendorId: 0x33df, productId: 0x0011 },
         { vendorId: 0x0738, productId: 0x8180 },
         // Best guess third party controllers
-        { usagePage: 0xFF00, usage: 1 }
+        { usagePage: 0xFF00, usage: 1 },
+        { usagePage: 1, usage: 5 },
     ];
 
     const devices = await navigator.hid.requestDevice({ filters: knownDevices })
+    console.dir(devices)
 
     if (devices.length > 0) {
         this.device = devices[0]
@@ -262,8 +264,8 @@ export class DualShock4 {
       // Report ID
       report[0] = 0x05
 
-      // Enable Rumble (0x01), Lightbar (0x02)
-      report[1] = 0xF0 | 0x01 | 0x02
+      // Enable Rumble (0x01), Lightbar (0x02), Lightbar Blink (0x04)
+      report[1] = 0xF0 | 0x01 | 0x02 | 0x04
 
       // Light rumble motor
       report[4] = this.rumble.light
@@ -276,6 +278,10 @@ export class DualShock4 {
       report[7] = this.lightbar.g
       // Lightbar Blue
       report[8] = this.lightbar.b
+      // Lightbar Blink On
+      report[9] = this.lightbar.blinkOn
+      // Lightbar Blink Off
+      report[10] = this.lightbar.blinkOff
 
       this.lastSentReport = report.buffer
 

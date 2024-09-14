@@ -15,6 +15,10 @@ export default class DualShock4Lightbar {
   private _g = 0
   /** @ignore */
   private _b = 0
+  /** @ignore */
+  private _blinkOn = 1
+  /** @ignore */
+  private _blinkOff = 0
 
   /**
    * Send Lightbar data to the controller.
@@ -54,6 +58,26 @@ export default class DualShock4Lightbar {
 
   set b (value : number) {
     this._b = Math.min(255, Math.max(0, value))
+    this.updateLightbar()
+  }
+
+  /** Blink Speed On (0-255) */
+  get blinkOn () {
+    return this._blinkOn
+  }
+
+  set blinkOn (value : number) {
+    this._blinkOn = Math.min(255, Math.max(0, value))
+    this.updateLightbar()
+  }
+
+  /** Blink Speed Off (0-255) */
+  get blinkOff () {
+    return this._blinkOff
+  }
+
+  set blinkOff (value : number) {
+    this._blinkOff = Math.min(255, Math.max(0, value))
     this.updateLightbar()
   }
 

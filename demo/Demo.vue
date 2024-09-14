@@ -16,7 +16,9 @@
         <h4>Lightbar Color</h4>
         <label>R: </label><input type="range" min="0" max="255" v-model="controller.lightbar.r"> ({{controller.lightbar.r}})<br>
         <label>G: </label><input type="range" min="0" max="255" v-model="controller.lightbar.g"> ({{controller.lightbar.g}})<br>
-        <label>B: </label><input type="range" min="0" max="255" v-model="controller.lightbar.b"> ({{controller.lightbar.b}})
+        <label>B: </label><input type="range" min="0" max="255" v-model="controller.lightbar.b"> ({{controller.lightbar.b}})<br>
+        <label>Blink On: </label><input type="range" min="0" max="255" v-model="controller.lightbar.blinkOn"> ({{controller.lightbar.blinkOn}})<br>
+        <label>Blink Off: </label><input type="range" min="0" max="255" v-model="controller.lightbar.blinkOff"> ({{controller.lightbar.blinkOff}})
         <h4>Rumble</h4>
         <label>Weak: </label><input type="range" min="0" max="255" v-model="controller.rumble.light">  ({{controller.rumble.light}})<br>
         <label>Strong: </label><input type="range" min="0" max="255" v-model="controller.rumble.heavy">  ({{controller.rumble.heavy}})
