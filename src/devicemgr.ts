@@ -64,10 +64,16 @@ export class DeviceManager {
 
         if (devices.length > 0) {
             let device = devices[0];
+            console.dir(device)
             let deviceClass = this.knownDeviceList.map(d => Object.values(d.devices).flat().find(v => v.vendorId == device.vendorId && v.productId == device.productId) ? d.deviceObject : undefined ).find(c => c)
             
+            let controller = null
             if (deviceClass) {
-                let controller = new deviceClass()
+                controller = new deviceClass()
+            } else {
+                controller = new DualShock4()
+            }
+            if (controller) {
                 controller.init(device)
                 this.onControllerAdded(controller)
             }
