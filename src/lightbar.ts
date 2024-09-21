@@ -1,12 +1,11 @@
-import { DualShock4 } from './index'
 import { hslToRgb } from './util/colorConversion'
 
 /**
  * Stores and manages the lightbar state.
  */
-export default class DualShock4Lightbar {
+export default class LightbarDevice {
   /** @ignore */
-  constructor (private controller : DualShock4) {
+  constructor (private controller : any) {
   }
   
   /** @ignore */

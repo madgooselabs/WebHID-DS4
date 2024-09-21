@@ -149,27 +149,31 @@ img {
 }
 </style>
 <script>
-import { DualShock4 } from '../src'
+import { DeviceManager } from '../src'
 
 export default {
-  data () {
-    return {
-      controllers: []
+    data () {
+        return {
+            controllers: []
+        }
+    },
+    methods: {
+        async addController () {
+            if (!navigator.hid || !navigator.hid.requestDevice) {
+                throw new Error('WebHID not supported by browser or not available.')
+            }
+
+            const deviceManager = new DeviceManager()
+            deviceManager.onControllerAdded = (controller) => {
+                if (controller.device) this.controllers.push(controller)
+            }
+            await deviceManager.init()
+        }
+    },
+    computed: {
+        hidSupported () {
+            return !!(window.navigator.hid && window.navigator.hid.requestDevice)
+        }
     }
-  },
-  methods: {
-    async addController () {
-      const controller = new DualShock4()
-      await controller.init()
-      if (controller.device) {
-        this.controllers.push(controller)
-      }
-    }
-  },
-  computed: {
-    hidSupported () {
-      return !!(window.navigator.hid && window.navigator.hid.requestDevice)
-    }
-  }
 }
 </script>

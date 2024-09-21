@@ -1,11 +1,9 @@
-import { DualShock4 } from './index'
-
 /**
  * Stores and manages the rumble state.
  */
-export default class DualShock4Rumble {
+export default class RumbleDevice {
   /** @ignore */
-  constructor (private controller : DualShock4) {
+  constructor (private controller : any) {
   }
   
   /** @ignore */
