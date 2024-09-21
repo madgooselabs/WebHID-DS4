@@ -5,6 +5,7 @@ export const DualShock5Reports : ControllerReportsByTarget = {
     USB: [
         { reportID: 0x01, name: 'Get Controller State' },
 //        { reportID: 0x02, name: 'Set Controller State' },
+        { reportID: 0x03, name: 'Get Controller Abilities' },
         { reportID: 0x05, name: 'Get Calibration' },
         { reportID: 0x08, name: 'Get Bluetooth Control' },
         { reportID: 0x09, name: 'Get Controller and Host MAC' },

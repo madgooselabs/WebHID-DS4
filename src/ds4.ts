@@ -61,9 +61,8 @@ export class DualShock4 {
             await this.device.open()
 
             this.device.oninputreport = (e : HIDInputReportEvent) => this.processControllerReport(e)
-            //this.state.reports = this.device!.collections!.map(c => c.featureReports!.map(m => m.reportId)).flat()
             this.state.reports = this.device!.collections!.map(c => c.featureReports!.map(m => Number(m.reportId))).flat().map(r => ({reportID: r, name: DualShock4Reports.USB.find(f => f.reportID == r)?.name})).filter(r => r.name)
-            if (this.state.reports.find((reportID) => reportID == 0x03)) {
+            if (this.state.reports.find(r => r.reportID == 0x03)) {
                 // get device details
                 let dataReport = new Uint8Array((await this.device!.receiveFeatureReport(0x03)).buffer)
                 this.state.controllerType = dataReport[5]
