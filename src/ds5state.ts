@@ -1,3 +1,5 @@
+import { ControllerReport } from './report'
+
 /**
  * Controller State
  * 
@@ -21,7 +23,7 @@ export interface DualShock5State {
     audio : string
 
     /** Report List */
-    reports : number[]
+    reports : ControllerReport[]
 
     /** Analog positions */
     axes : DualShock5AnalogState

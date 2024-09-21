@@ -46,6 +46,24 @@
           <b>Touch #{{touch.touchId}}:</b> {{touch.x}}, {{touch.y}}
         </div>
       </div>
+      <div class="reports">
+        <h3>Reports</h3>
+        <div>
+            <label>Get Report:</label>
+            <select class="report-select" v-model="controller.selectedReport">
+                <option disabled value="">Select a report</option>
+                <option v-for="report in controller.state.reports" :value="report">
+                    {{ `0x${report.reportID.toString(16).padStart(2, '0')}${report.name ? ` - ${report.name}` : ''}` }}
+                </option>
+            </select>
+        </div>
+        <div>
+            <textarea class="report-text" readonly v-model="controller.lastTriggeredReport"></textarea>
+        </div>
+        <div>
+            <button @click="controller.getFeatureReport()">Get Report</button>
+        </div>
+      </div>
     </div>
     <br><br>
     <button v-if="hidSupported" @click="addController">Connect Controller</button>
@@ -58,8 +76,11 @@
 </template>
 <style>
 /* Default Light Mode Styles */
-body {
+* {
     font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+}
+
+body {
     font-weight: 300;
     margin: auto;
     padding: 16px;
@@ -119,6 +140,17 @@ img {
     text-transform: capitalize;
 }
 
+.report-select {
+    background: #e0e0e0;
+    font-family: monospace;
+}
+
+.report-text {
+    width: 100%;
+    height: 200px;
+    font-family: monospace;
+}
+
 /* Dark Mode Styles */
 @media (prefers-color-scheme: dark) {
     body {
@@ -145,6 +177,11 @@ img {
 
     .analogs .analog, .buttons .btn {
         background: #444;
+    }
+
+    .report-text, .report-select {
+        background: #444;
+        color: #e0e0e0;
     }
 }
 </style>

@@ -4,6 +4,9 @@ import RumbleDevice from './rumble'
 import { normalizeThumbstick, normalizeTrigger } from './util/normalize'
 import { Buffer } from 'buffer'
 import { crc32 } from 'crc'
+import { ControllerReport } from './report'
+import { DualShock4Reports } from './ds4reports'
+import { buf2hex, buf2str } from './util/buffer'
 
 /**
  * Main class.
@@ -25,6 +28,9 @@ export class DualShock4 {
     /** Allows rumble control */
     rumble = new RumbleDevice(this)
 
+    selectedReport ?: ControllerReport
+    lastTriggeredReport ?: string
+
     constructor () {
         if (!navigator.hid || !navigator.hid.requestDevice) {
             throw new Error('WebHID not supported by browser or not available.')
@@ -33,6 +39,17 @@ export class DualShock4 {
 
     getNameOfControllerType(controllerType : Number) : any {
         return (DualShock4ControllerType[controllerType] ? DualShock4ControllerType[controllerType] : `Unknown Type: 0x${controllerType.toString(16).padStart(2, '0')}`);
+    }
+
+    async getFeatureReport() {
+        if (!this.selectedReport) return
+
+        try {
+            let dataReport = new Uint8Array((await this.device!.receiveFeatureReport(this.selectedReport.reportID)).buffer)
+            this.lastTriggeredReport = `Report ID: ${buf2hex(dataReport.slice(0,1))}\n\nData: ${buf2hex(dataReport.slice(1))}\n\nString: ${buf2str(dataReport.slice(1))}`
+        } catch (err:any) {
+            this.lastTriggeredReport = err.toString()
+        }
     }
 
     async init (dev ?: HIDDevice) {
@@ -44,7 +61,8 @@ export class DualShock4 {
             await this.device.open()
 
             this.device.oninputreport = (e : HIDInputReportEvent) => this.processControllerReport(e)
-            this.state.reports = this.device!.collections!.map(c => c.featureReports!.map(m => m.reportId)).flat()
+            //this.state.reports = this.device!.collections!.map(c => c.featureReports!.map(m => m.reportId)).flat()
+            this.state.reports = this.device!.collections!.map(c => c.featureReports!.map(m => Number(m.reportId))).flat().map(r => ({reportID: r, name: DualShock4Reports.USB.find(f => f.reportID == r)?.name})).filter(r => r.name)
             if (this.state.reports.find((reportID) => reportID == 0x03)) {
                 // get device details
                 let dataReport = new Uint8Array((await this.device!.receiveFeatureReport(0x03)).buffer)
@@ -57,12 +75,6 @@ export class DualShock4 {
         } else {
             this.device = undefined
         }
-    }
-
-    private buf2hex(buffer:ArrayBuffer) { // buffer is an ArrayBuffer
-        return [...new Uint8Array(buffer)]
-            .map(x => '0x'+x.toString(16).padStart(2, '0'))
-            .join(', ');
     }
 
     /**

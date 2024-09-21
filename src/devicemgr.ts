@@ -45,6 +45,8 @@ export class DeviceManager {
             devices : [
                 // DualSense
                 { vendorId: 0x054C, productId: 0x0CE6 },
+                // DualSense Edge
+                { vendorId: 0x054C, productId: 0x0DF2 },
             ]
         },
     ]
@@ -61,14 +63,12 @@ export class DeviceManager {
         const devices = await navigator.hid.requestDevice({ filters: knownDevices })
 
         if (devices.length > 0) {
-            //console.dir(devices);
             let device = devices[0];
             let deviceClass = this.knownDeviceList.map(d => Object.values(d.devices).flat().find(v => v.vendorId == device.vendorId && v.productId == device.productId) ? d.deviceObject : undefined ).find(c => c)
             
             if (deviceClass) {
                 let controller = new deviceClass()
                 controller.init(device)
-                console.dir(controller)
                 this.onControllerAdded(controller)
             }
         }
