@@ -6,7 +6,7 @@ import { Buffer } from 'buffer'
 import { crc32 } from 'crc'
 import { ControllerReport } from './report'
 import { DualShock4Reports } from './ds4reports'
-import { buf2hex, buf2str } from './util/buffer'
+import { buf2hex, buf2str, buf2view } from './util/buffer'
 
 /**
  * Main class.
@@ -30,6 +30,8 @@ export class DualShock4 {
 
     selectedReport ?: ControllerReport
     lastTriggeredReport ?: string
+
+    miscData ?: string = ''
 
     constructor () {
         if (!navigator.hid || !navigator.hid.requestDevice) {
@@ -60,7 +62,6 @@ export class DualShock4 {
 
             await this.device.open()
 
-            this.device.oninputreport = (e : HIDInputReportEvent) => this.processControllerReport(e)
             this.state.reports = this.device!.collections!.map(c => c.featureReports!.map(m => Number(m.reportId))).flat().map(r => ({reportID: r, name: DualShock4Reports.USB.find(f => f.reportID == r)?.name})).filter(r => r.name)
             if (this.state.reports.find(r => r.reportID == 0x03)) {
                 // get device details
@@ -68,12 +69,22 @@ export class DualShock4 {
                 this.state.controllerType = dataReport[5]
                 //let dataReport = await this.device.sendFeatureReport(0x14, new Uint8Array([0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]))
                 //console.dir(dataReport)
+
+                this.device.oninputreport = (e : HIDInputReportEvent) => this.processControllerReport(e)
             } else {
                 this.state.controllerType = DualShock4ControllerType.Gamepad
+                this.device.oninputreport = (e : HIDInputReportEvent) => this.processGenericControllerReport(e)
             }
         } else {
             this.device = undefined
         }
+    }
+
+    private processGenericControllerReport (report : HIDInputReportEvent) {
+        const { data } = report
+        this.lastReport = data.buffer
+
+        console.dir(buf2hex(data.buffer))
     }
 
     /**
@@ -87,11 +98,8 @@ export class DualShock4 {
         const { data } = report
         this.lastReport = data.buffer
 
-        if (report.reportId != 0x01) {
-            console.dir(report.reportId);
-            console.dir(data.buffer);
-            console.log('---');
-        }
+        //this.miscData = `Data:\n${buf2hex(data.buffer.slice(10))}\n\nString:\n${buf2str(data.buffer.slice(10))}`
+        this.miscData = `HID:\n${buf2view(data.buffer.slice(0,9))}\n\nData:\n${buf2view(data.buffer.slice(10))}`
 
         // Interface is unknown
         if (this.state.interface === DualShock4Interface.Disconnected) {
@@ -159,55 +167,63 @@ export class DualShock4 {
         this.state.buttons.playStation = !!(buttons3 & 0x01)
         this.state.buttons.touchPadClick = !!(buttons3 & 0x02)
 
-        // Update Triggers
-        this.state.axes.l2 = normalizeTrigger(data.getUint8(7))
-        this.state.axes.r2 = normalizeTrigger(data.getUint8(8))
+        switch (this.state.controllerType) {
+            case DualShock4ControllerType.Gamepad:
+                // Update Triggers
+                this.state.axes.l2 = normalizeTrigger(data.getUint8(7))
+                this.state.axes.r2 = normalizeTrigger(data.getUint8(8))
 
-        // Update battery level
-        this.state.charging = !!(data.getUint8(29) & 0x10)
-        if (this.state.charging) {
-            this.state.battery = Math.min(Math.floor((data.getUint8(29) & 0x0F) * 100 / 11))
-        } else {
-            this.state.battery = Math.min(100, Math.floor((data.getUint8(29) & 0x0F) * 100 / 8))
-        }
+                // Update battery level
+                this.state.charging = !!(data.getUint8(29) & 0x10)
+                if (this.state.charging) {
+                    this.state.battery = Math.min(Math.floor((data.getUint8(29) & 0x0F) * 100 / 11))
+                } else {
+                    this.state.battery = Math.min(100, Math.floor((data.getUint8(29) & 0x0F) * 100 / 8))
+                }
 
-        this.state.headphones = !!(data.getUint8(29) & 0x20)
-        this.state.microphone = !!(data.getUint8(29) & 0x40)
-        this.state.extension = !!(data.getUint8(29) & 0x80)
+                this.state.headphones = !!(data.getUint8(29) & 0x20)
+                this.state.microphone = !!(data.getUint8(29) & 0x40)
+                this.state.extension = !!(data.getUint8(29) & 0x80)
 
-        if (this.state.headphones && this.state.microphone) {
-            this.state.audio = 'headset'
-        } else if (this.state.headphones && !this.state.microphone) {
-            this.state.audio = 'headphones'
-        } else if (!this.state.headphones && this.state.microphone) {
-            this.state.audio = 'microphone'
-        } else {
-            this.state.audio = 'volume-high'
-        }
+                if (this.state.headphones && this.state.microphone) {
+                    this.state.audio = 'headset'
+                } else if (this.state.headphones && !this.state.microphone) {
+                    this.state.audio = 'headphones'
+                } else if (!this.state.headphones && this.state.microphone) {
+                    this.state.audio = 'microphone'
+                } else {
+                    this.state.audio = 'volume-high'
+                }
 
-        // Update motion input
-        this.state.axes.gyroX = data.getUint16(13)
-        this.state.axes.gyroY = data.getUint16(15)
-        this.state.axes.gyroZ = data.getUint16(17)
-        this.state.axes.accelX = data.getInt16(19)
-        this.state.axes.accelY = data.getInt16(21)
-        this.state.axes.accelZ = data.getInt16(23)
+                // Update motion input
+                this.state.axes.gyroX = data.getUint16(13)
+                this.state.axes.gyroY = data.getUint16(15)
+                this.state.axes.gyroZ = data.getUint16(17)
+                this.state.axes.accelX = data.getInt16(19)
+                this.state.axes.accelY = data.getInt16(21)
+                this.state.axes.accelZ = data.getInt16(23)
 
-        // Update touchpad
-        this.state.touchpad.touches = []
-        if (!(data.getUint8(34) & 0x80)) {
-            this.state.touchpad.touches.push({
-            touchId: data.getUint8(34) & 0x7F,
-            x: (data.getUint8(36) & 0x0F) << 8 | data.getUint8(35),
-            y: data.getUint8(37) << 4 | (data.getUint8(36) & 0xF0) >> 4
-            })
-        }
-        if (!(data.getUint8(38) & 0x80)) {
-            this.state.touchpad.touches.push({
-            touchId: data.getUint8(38) & 0x7F,
-            x: (data.getUint8(40) & 0x0F) << 8 | data.getUint8(39),
-            y: data.getUint8(41) << 4 | (data.getUint8(40) & 0xF0) >> 4
-            })
+                // Update touchpad
+                this.state.touchpad.touches = []
+                if (!(data.getUint8(34) & 0x80)) {
+                    this.state.touchpad.touches.push({
+                    touchId: data.getUint8(34) & 0x7F,
+                    x: (data.getUint8(36) & 0x0F) << 8 | data.getUint8(35),
+                    y: data.getUint8(37) << 4 | (data.getUint8(36) & 0xF0) >> 4
+                    })
+                }
+                if (!(data.getUint8(38) & 0x80)) {
+                    this.state.touchpad.touches.push({
+                    touchId: data.getUint8(38) & 0x7F,
+                    x: (data.getUint8(40) & 0x0F) << 8 | data.getUint8(39),
+                    y: data.getUint8(41) << 4 | (data.getUint8(40) & 0xF0) >> 4
+                    })
+                }
+                break
+            case DualShock4ControllerType.HOTAS:
+                //console.dir(data.getUint8(46)) // turn joystick
+                //console.dir(data.getUint8(47)) // rudder handle
+                //console.dir(data.getUint8(48)) // rudder lever
         }
     }
 

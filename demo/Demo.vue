@@ -47,6 +47,10 @@
         </div>
       </div>
       <div class="reports">
+        <h3>Misc Data</h3>
+        <div>
+            <textarea class="raw-text" readonly v-model="controller.miscData"></textarea>
+        </div>
         <h3>Reports</h3>
         <div>
             <label>Get Report:</label>
@@ -145,7 +149,7 @@ img {
     font-family: monospace;
 }
 
-.report-text {
+.report-text, .raw-text {
     width: 100%;
     height: 200px;
     font-family: monospace;
@@ -179,7 +183,7 @@ img {
         background: #444;
     }
 
-    .report-text, .report-select {
+    .report-text, .report-select, .raw-text {
         background: #444;
         color: #e0e0e0;
     }
